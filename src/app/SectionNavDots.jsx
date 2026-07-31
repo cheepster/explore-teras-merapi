@@ -47,9 +47,13 @@ export default function SectionNavDots() {
       setScrolling(true);
       if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
       idleTimerRef.current = setTimeout(() => setScrolling(false), IDLE_DELAY);
+
+      const nearBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+      if (nearBottom) setActiveId(SECTIONS[SECTIONS.length - 1].id);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     idleTimerRef.current = setTimeout(() => setScrolling(false), IDLE_DELAY);
+    handleScroll();
 
     return () => {
       sectionObserver.disconnect();

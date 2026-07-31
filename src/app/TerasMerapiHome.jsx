@@ -287,7 +287,16 @@ export default function TerasMerapiHome({ initialData }) {
   const [activeFilter, setActive] = useState('Semua');
   const [muted, setMuted] = useState(true);
   const [videoReady, setVideoReady] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(0);
   const videoRef = useRef(null);
+
+  const handleVideoProgress = (e) => {
+    const video = e.target;
+    if (video.duration && video.buffered.length > 0) {
+      const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+      setVideoProgress(Math.min(100, Math.round((bufferedEnd / video.duration) * 100)));
+    }
+  };
 
   // GSAP Refs
   const mainRef = useRef(null);
@@ -596,6 +605,7 @@ export default function TerasMerapiHome({ initialData }) {
         <video ref={videoRef} className="hero-video"
           style={{ opacity: videoReady ? 1 : 0, transition: 'opacity 1.5s ease' }}
           autoPlay loop muted playsInline preload="metadata" onCanPlay={() => setVideoReady(true)}
+          onProgress={handleVideoProgress}
           poster="/assets/hero-poster.webp"
         >
           <source src="/assets/hero.mp4" type="video/mp4" />
@@ -644,7 +654,7 @@ export default function TerasMerapiHome({ initialData }) {
           <div className="absolute right-[5%] top-[12%] xl:right-[9%] xl:top-[18%] pointer-events-auto group rotate-10">
             <div className="w-44 h-56 md:w-56 md:h-72 rounded-2xl overflow-hidden border border-[#5B4838]/50 group-hover:border-[#C97B3A]/80 transition-all duration-500 relative shadow-[0_25px_60px_rgba(0,0,0,0.8)]">
               <Image src="/assets/night-vibe.jpeg" alt="Suasana Malam"
-                fill sizes="230px"
+                fill sizes="230px" priority
                 className="object-cover transition-transform duration-1400ms group-hover:scale-110" />
               <div className="absolute inset-0 bg-linear-to-t from-[#120E0A]/80 via-transparent to-transparent" />
               <div className="hidden lg:block absolute bottom-3 left-3 font-mono text-[9px] tracking-widest text-[#F0E6D3] uppercase font-medium">Suasana Malam</div>
@@ -715,9 +725,23 @@ export default function TerasMerapiHome({ initialData }) {
         <button onClick={toggleMute} className="absolute bottom-8 right-8 z-30 p-2.5 rounded-full border border-[#5B4838]/40 backdrop-blur-md text-[#F0E6D3]/70 hover:text-[#F0E6D3] hover:border-[#F0E6D3]/60 transition-all duration-300">
           {muted ? <VolumeX size={15} /> : <Volume2 size={15} />}
         </button>
-        <div className="absolute bottom-8 left-1/2 z-30 flex flex-col items-center gap-2 animate-bounce-subtle opacity-50">
-          <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-[#F0E6D3]">Scroll</span>
-          <ChevronDown size={14} className="text-[#F0E6D3]" />
+        <div className="absolute bottom-8 left-1/2 z-30 flex flex-col items-center gap-2">
+          {videoReady ? (
+            <div className="flex flex-col items-center gap-2 animate-bounce-subtle opacity-50">
+              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-[#F0E6D3]">Scroll</span>
+              <ChevronDown size={14} className="text-[#F0E6D3]" />
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2 opacity-70">
+              <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-[#A89070]">Menyiapkan Video</span>
+              <div className="w-32 h-0.5 bg-[#5B4838]/30 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-[#C97B3A] transition-all duration-300 ease-out"
+                  style={{ width: `${videoProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
