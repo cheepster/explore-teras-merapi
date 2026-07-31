@@ -43,7 +43,7 @@ export default function HeroCarousel({ images = [], alt = '' }) {
           fill
           sizes="100vw"
           priority={i === 0}
-          unoptimized={src.includes('placehold.co')}
+          unoptimized
           className="object-cover transition-opacity duration-700 ease-in-out"
           style={{ opacity: i === index ? 1 : 0 }}
           onError={(e) => { e.currentTarget.style.opacity = 0; }}

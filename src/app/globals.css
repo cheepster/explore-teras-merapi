@@ -46,7 +46,6 @@ body {
   color: var(--ember);
 }
 
-/* Cinematic Documentary Drift (<1° rotation, organic breathing) */
 @keyframes float-drift-1 {
   0%, 100% { transform: translateY(0px) rotate(-0.4deg); }
   50%       { transform: translateY(-8px) rotate(0.3deg); }
@@ -113,6 +112,14 @@ body {
   animation: ambientFadeIn 1.4s ease-out;
 }
 
+@keyframes fabIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.9); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-fab-in {
+  animation: fabIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
 .grain::after {
   content: '';
   position: fixed;
@@ -177,7 +184,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .tm-mist, .tm-particle, .animate-float, .animate-float-delay, .animate-float-right,
   .grain::after, .animate-marquee, .shimmer-text, .animate-ember, .animate-bounce-subtle,
-  .animate-ambient-fade {
+  .animate-ambient-fade, .animate-fab-in {
     animation: none;
   }
 }

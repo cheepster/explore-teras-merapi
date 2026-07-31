@@ -1,6 +1,7 @@
 import "./globals.css";
 import { EB_Garamond, DM_Mono } from "next/font/google";
-import WhatsAppFab from "./WhatsAppFab";
+import { Analytics } from "@vercel/analytics/next";
+import QuickActionsFab from "./QuickActionsFab";
 
 const ebGaramond = EB_Garamond({
   subsets: ["latin"],
@@ -61,7 +62,8 @@ export default function RootLayout({ children }) {
     <html lang="id" className={`h-full scroll-smooth ${ebGaramond.variable} ${dmMono.variable}`}>
       <body className="min-h-full antialiased">
         {children}
-        <WhatsAppFab />
+        <QuickActionsFab />
+        <Analytics />
       </body>
     </html>
   );

@@ -1,13 +1,17 @@
-export function getDriveUrl(url) {
+function toFastImage(url, width = 800) {
+  return `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=${width}&q=75&output=webp`;
+}
+
+export function getDriveUrl(url, { width } = {}) {
   if (!url) return '';
   if (/^https?:\/\/lh3\.googleusercontent\.com\//.test(url)) return url;
   if (/^https?:\/\/placehold\.co\//.test(url)) {
     return url.replace(/^(https:\/\/placehold\.co\/\d+x\d+)(\.\w+)?/, '$1.png');
   }
   const idMatch = url.match(/id=([^&]+)/);
-  if (idMatch) return `https://drive.google.com/thumbnail?id=${idMatch[1]}&sz=w1000`;
+  if (idMatch) return toFastImage(`https://drive.google.com/thumbnail?id=${idMatch[1]}&sz=w1000`, width);
   const dMatch = url.match(/\/file\/d\/([^/]+)/);
-  if (dMatch) return `https://drive.google.com/thumbnail?id=${dMatch[1]}&sz=w1000`;
+  if (dMatch) return toFastImage(`https://drive.google.com/thumbnail?id=${dMatch[1]}&sz=w1000`, width);
   return url;
 }
 

@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useRef, startTransition } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, startTransition } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import SectionNavDots from './SectionNavDots';
 import {
   Camera, ArrowRight,
   Quote, ChevronDown, MapPin, Mountain,
@@ -222,6 +223,15 @@ function ItemCard({ item, index }) {
   const pinterestAspects = ['aspect-[3/4]', 'aspect-[4/5]', 'aspect-square', 'aspect-[5/4]', 'aspect-[4/3]'];
   const aspectClass = pinterestAspects[seed % pinterestAspects.length];
 
+  const descClampByAspect = {
+    'aspect-[3/4]': 'line-clamp-5',
+    'aspect-[4/5]': 'line-clamp-4',
+    'aspect-square': 'line-clamp-3',
+    'aspect-[5/4]': 'line-clamp-2',
+    'aspect-[4/3]': 'line-clamp-2',
+  };
+  const descClampClass = descClampByAspect[aspectClass] || 'line-clamp-3';
+
   return (
     <div ref={cardRef} className="w-full">
       <Link href={`/${item.tab}/${slug}`} className="block w-full">
@@ -231,7 +241,7 @@ function ItemCard({ item, index }) {
               src={imgSrc}
               alt={item.nama}
               fill
-              unoptimized={isPlaceholder}
+              unoptimized
               sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
               onError={(e) => { e.currentTarget.src = PLACEHOLDER; }}
               className="object-cover transition-transform duration-1400ms ease-out group-hover:scale-[1.05]"
@@ -250,13 +260,13 @@ function ItemCard({ item, index }) {
 
             <div className="absolute inset-0 p-5 flex flex-col justify-end bg-[#120E0A]/92 backdrop-blur-md translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-in-out z-10 border-t border-[#C97B3A]/30">
               {item.harga && (
-                <span className="font-mono text-[9px] tracking-[0.18em] uppercase text-[#C97B3A] mb-3 inline-block font-medium">
+                <span className="shrink-0 font-mono text-[9px] tracking-[0.18em] uppercase text-[#C97B3A] mb-3 inline-block font-medium">
                   {item.harga}
                 </span>
               )}
-              <h3 className="font-serif text-xl md:text-2xl text-[#F0E6D3] mb-2">{item.nama}</h3>
-              <p className="font-serif text-sm text-[#A89070] leading-relaxed mb-5 line-clamp-4">{item.deskripsi}</p>
-              <div className="flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-[#C97B3A] font-medium">
+              <h3 className="shrink-0 font-serif text-xl md:text-2xl text-[#F0E6D3] mb-2 line-clamp-2">{item.nama}</h3>
+              <p className={`shrink-0 font-serif text-sm text-[#A89070] leading-relaxed mb-5 ${descClampClass}`}>{item.deskripsi}</p>
+              <div className="shrink-0 flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase text-[#C97B3A] font-medium">
                 <span>Selengkapnya</span>
                 <ArrowRight size={11} className="group-hover:translate-x-1.5 transition-transform duration-300" />
               </div>
@@ -315,11 +325,22 @@ export default function TerasMerapiHome({ initialData }) {
     ])
   );
 
+  useLayoutEffect(() => {
+    try {
+      const saved = sessionStorage.getItem('tm-active-tab');
+      if (saved && saved !== activeTab) setActiveTab(saved);
+    } catch {
+
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleTabSwitch = (key) => {
     startTransition(() => {
       setActiveTab(key);
       setActive('Semua');
     });
+    try { sessionStorage.setItem('tm-active-tab', key); } catch {}
   };
 
   const handleFilterChange = (opt) => {
@@ -567,6 +588,7 @@ export default function TerasMerapiHome({ initialData }) {
 
       <div
         ref={heroRef}
+        id="hero"
         onMouseMove={handleHeroMouseMove}
         onMouseLeave={handleHeroMouseLeave}
         className="relative w-full h-screen flex flex-col items-center justify-center bg-[#120E0A] overflow-hidden cursor-default"
@@ -576,7 +598,6 @@ export default function TerasMerapiHome({ initialData }) {
           autoPlay loop muted playsInline preload="metadata" onCanPlay={() => setVideoReady(true)}
           poster="/assets/hero-poster.webp"
         >
-          <source src="/assets/hero.webm" type="video/webm" />
           <source src="/assets/hero.mp4" type="video/mp4" />
         </video>
 
@@ -614,7 +635,7 @@ export default function TerasMerapiHome({ initialData }) {
                   fill sizes="200px"
                   className="object-cover transition-transform duration-1400ms group-hover:scale-110" />
               </div>
-              <div className="mt-2 flex items-center justify-between px-1 font-mono text-[8px] uppercase tracking-widest text-[#A89070]">
+              <div className="hidden lg:flex mt-2 items-center justify-between px-1 font-mono text-[8px] uppercase tracking-widest text-[#A89070]">
                 <span>REC 01</span><span className="text-[#C97B3A]">●</span>
               </div>
             </div>
@@ -626,7 +647,7 @@ export default function TerasMerapiHome({ initialData }) {
                 fill sizes="230px"
                 className="object-cover transition-transform duration-1400ms group-hover:scale-110" />
               <div className="absolute inset-0 bg-linear-to-t from-[#120E0A]/80 via-transparent to-transparent" />
-              <div className="absolute bottom-3 left-3 font-mono text-[9px] tracking-widest text-[#F0E6D3] uppercase font-medium">Suasana Malam</div>
+              <div className="hidden lg:block absolute bottom-3 left-3 font-mono text-[9px] tracking-widest text-[#F0E6D3] uppercase font-medium">Suasana Malam</div>
             </div>
           </div>
 
@@ -636,7 +657,7 @@ export default function TerasMerapiHome({ initialData }) {
                 fill sizes="210px"
                 className="object-cover transition-transform duration-1400ms group-hover:scale-110" />
               <div className="absolute inset-0 bg-linear-to-t from-[#120E0A]/90 via-transparent to-transparent" />
-              <div className="absolute bottom-3 left-3 flex items-center gap-2 font-mono text-[8px] tracking-widest text-[#C97B3A] uppercase">
+              <div className="hidden lg:flex absolute bottom-3 left-3 items-center gap-2 font-mono text-[8px] tracking-widest text-[#C97B3A] uppercase">
                 <Camera size={11} /><span>Spot Foto</span>
               </div>
             </div>
@@ -649,7 +670,7 @@ export default function TerasMerapiHome({ initialData }) {
                   fill sizes="200px"
                   className="object-cover transition-transform duration-1400ms group-hover:scale-110" />
               </div>
-              <div className="mt-2.5 flex items-center justify-between px-1 font-mono text-[8px] uppercase tracking-widest text-[#A89070]">
+              <div className="hidden lg:flex mt-2.5 items-center justify-between px-1 font-mono text-[8px] uppercase tracking-widest text-[#A89070]">
                 <span>Angan Cangkringan</span><span className="text-[#C97B3A] font-bold">US.</span>
               </div>
             </div>
@@ -905,7 +926,7 @@ export default function TerasMerapiHome({ initialData }) {
         EXPLORE/CATALOG
        */}
 
-      <section id="explore" className="relative py-24 max-w-7xl mx-auto min-h-screen px-6 md:px-12">
+      <section id="explore" className="relative py-24 min-h-screen">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {ambientImg && (
             <Image
@@ -913,13 +934,16 @@ export default function TerasMerapiHome({ initialData }) {
               src={ambientImg}
               alt=""
               fill
-              sizes="(min-width: 1280px) 1280px, 100vw"
+              sizes="100vw"
+              unoptimized
               className="object-cover scale-125 blur-3xl animate-ambient-fade"
             />
           )}
           <div className="absolute inset-0 bg-[#120E0A]/55" />
           <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, transparent 25%, rgba(18,14,10,0.65) 100%)' }} />
         </div>
+
+        <div className="relative max-w-7xl mx-auto px-6 md:px-12">
 
         <div ref={exploreHeadRef} className="mb-10">
           <ArtsyEyebrow text="Bab III · Katalog Desa" />
@@ -1040,9 +1064,11 @@ export default function TerasMerapiHome({ initialData }) {
             />
           </div>
         </div>
+
+        </div>
       </section>
 
-      <footer ref={footerRef} className="bg-[#120E0A] py-16 px-8 border-t border-[#5B4838]/20">
+      <footer ref={footerRef} id="footer" className="bg-[#120E0A] py-16 px-8 border-t border-[#5B4838]/20">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-10 border-b border-[#5B4838]/20">
             <div>
@@ -1072,6 +1098,8 @@ export default function TerasMerapiHome({ initialData }) {
           </div>
         </div>
       </footer>
+
+      <SectionNavDots />
 
     </div>
   );
