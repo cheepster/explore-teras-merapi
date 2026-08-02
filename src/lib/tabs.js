@@ -1,7 +1,7 @@
 import { Coffee, Home, Ticket, Calendar } from 'lucide-react';
 
 export const TABS = [
-  { key: 'layanan', label: 'Tiket & Fasilitas', Icon: Ticket },
+  { key: 'layanan', label: 'Layanan', Icon: Ticket },
   { key: 'events', label: 'Event', Icon: Calendar },
   { key: 'umkm', label: 'UMKM Lokal', Icon: Coffee },
   { key: 'homestay', label: 'Homestay', Icon: Home },
@@ -18,7 +18,7 @@ export const FILTER_OPTIONS = {
 
 export const TAB_DESCRIPTIONS = {
   layanan: {
-    title: 'Tiket & Fasilitas Teras Merapi',
+    title: 'Layanan Teras Merapi',
     subtitle: 'Akses Mudah dan Fasilitas Nyaman untuk Pengalaman Wisata Terbaik',
     p1: 'Teras Merapi menghadirkan berbagai layanan wisata serta fasilitas pendukung yang dirancang untuk kenyamanan seluruh pengunjung.',
     p2: 'Dengan pengelolaan terbaik, setiap fasilitas dipastikan ramah keluarga, aman, serta terawat demi memberikan pengalaman berlibur yang berkesan di sejuknya lereng Merapi.',

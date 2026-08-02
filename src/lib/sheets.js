@@ -2,6 +2,8 @@ function toFastImage(url, width = 800) {
   return `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=${width}&q=75&output=webp`;
 }
 
+const SHEETS_REVALIDATE = process.env.NODE_ENV === 'development' ? 0 : 3600;
+
 export function getDriveUrl(url, { width } = {}) {
   if (!url) return '';
   if (/^https?:\/\/lh3\.googleusercontent\.com\//.test(url)) return url;
@@ -36,7 +38,7 @@ export async function fetchAllItems() {
   if (!url) return FALLBACK_DATA;
 
   try {
-    const res = await fetch(url, { next: { revalidate: 3600 } });
+    const res = await fetch(url, { next: { revalidate: SHEETS_REVALIDATE } });
     const text = await res.text();
 
     const { default: Papa } = await import('papaparse');
@@ -81,7 +83,7 @@ export async function fetchProdukByUmkmId(umkmId) {
   if (!url) return [];
 
   try {
-    const res = await fetch(url, { next: { revalidate: 3600 } });
+    const res = await fetch(url, { next: { revalidate: SHEETS_REVALIDATE } });
     const text = await res.text();
 
     const { default: Papa } = await import('papaparse');

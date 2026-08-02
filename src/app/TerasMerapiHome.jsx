@@ -7,6 +7,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import SectionNavDots from './SectionNavDots';
+import PhotoLightbox from './PhotoLightbox';
 import {
   Camera, ArrowRight,
   Quote, ChevronDown, MapPin, Mountain,
@@ -199,6 +200,17 @@ function ItemCard({ item, index }) {
   const isPlaceholder = imgSrc.includes('placehold.co');
   const slug = item.id || toSlug(item.nama);
 
+  const galeri = (item.galeri && item.galeri.length > 0) ? item.galeri : (isPlaceholder ? [] : [imgSrc]);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const openLightbox = (e, i = 0) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setLightboxIndex(i);
+    setLightboxOpen(true);
+  };
+
   const seed = hashSeed(slug || String(index));
   const randomDelay = 0.03 + (seed % 50) / 1000;
 
@@ -249,6 +261,20 @@ function ItemCard({ item, index }) {
             <div className="absolute inset-0 bg-linear-to-t from-[#120E0A]/95 via-[#120E0A]/15 to-transparent transition-opacity duration-700" />
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" style={{ background: 'radial-gradient(ellipse at center, transparent 35%, rgba(18,14,10,0.4) 100%)' }} />
 
+            {galeri.length > 0 && (
+              <button
+                type="button"
+                onClick={(e) => openLightbox(e, 0)}
+                aria-label={`Lihat foto ${item.nama}${galeri.length > 1 ? ` (${galeri.length} foto)` : ''}`}
+                className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-[#120E0A]/70 border border-[#5B4838]/40 backdrop-blur-md text-[#F0E6D3]/90 opacity-80 md:opacity-0 md:group-hover:opacity-100 hover:border-[#C97B3A]/60 hover:text-[#F0E6D3] transition-all duration-300 cursor-pointer"
+              >
+                <Camera size={12} />
+                {galeri.length > 1 && (
+                  <span className="font-mono text-[9px] tracking-wide">{galeri.length}</span>
+                )}
+              </button>
+            )}
+
             <div className="absolute inset-x-0 bottom-0 p-5 transition-transform duration-500 ease-in-out group-hover:translate-y-full">
               {item.kategori && (
                 <span className="font-mono text-[9px] tracking-[0.18em] uppercase text-[#C97B3A] border border-[#C97B3A]/40 px-2.5 py-0.5 rounded-sm mb-2.5 inline-block bg-[#120E0A]/70 backdrop-blur-xs">
@@ -274,6 +300,16 @@ function ItemCard({ item, index }) {
           </div>
         </div>
       </Link>
+
+      {lightboxOpen && (
+        <PhotoLightbox
+          images={galeri}
+          alt={item.nama}
+          index={lightboxIndex}
+          onIndexChange={setLightboxIndex}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
     </div>
   );
 }
@@ -297,6 +333,21 @@ export default function TerasMerapiHome({ initialData }) {
       setVideoProgress(Math.min(100, Math.round((bufferedEnd / video.duration) * 100)));
     }
   };
+
+  // `progress` event fires irregularly (and barely at all on some mobile browsers),
+  // so poll the buffered range directly while the video isn't ready yet — this is
+  // what actually keeps the loading bar moving instead of it sitting at 0%.
+  useEffect(() => {
+    if (videoReady) return;
+    const interval = setInterval(() => {
+      const video = videoRef.current;
+      if (video && video.duration && video.buffered.length > 0) {
+        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+        setVideoProgress(Math.min(100, Math.round((bufferedEnd / video.duration) * 100)));
+      }
+    }, 200);
+    return () => clearInterval(interval);
+  }, [videoReady]);
 
   // GSAP Refs
   const mainRef = useRef(null);
@@ -604,15 +655,24 @@ export default function TerasMerapiHome({ initialData }) {
       >
         <video ref={videoRef} className="hero-video"
           style={{ opacity: videoReady ? 1 : 0, transition: 'opacity 1.5s ease' }}
-          autoPlay loop muted playsInline preload="metadata" onCanPlay={() => setVideoReady(true)}
+          autoPlay loop muted playsInline preload="auto" onCanPlay={() => setVideoReady(true)}
           onProgress={handleVideoProgress}
           poster="/assets/hero-poster.webp"
         >
-          <source src="/assets/hero.mp4" type="video/mp4" />
+          <source src="/assets/hero-compressed.mp4" type="video/mp4" />
         </video>
 
         {!videoReady && (
-          <div className="absolute inset-0 bg-linear-to-br from-[#1C1611] via-[#120E0A] to-[#120E0A]">
+          <div className="absolute inset-0">
+            <Image
+              src="/assets/hero-poster.webp"
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover scale-110 blur-md animate-splash-breathe"
+            />
+            <div className="absolute inset-0 bg-[#120E0A]/50" />
             <div className="absolute inset-0 opacity-25"
               style={{ backgroundImage: 'radial-gradient(ellipse 80% 60% at 50% 40%, #7A3F12 0%, transparent 70%)' }} />
           </div>

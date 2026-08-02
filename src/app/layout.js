@@ -60,6 +60,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="id" className={`h-full scroll-smooth ${ebGaramond.variable} ${dmMono.variable}`}>
+      <head>
+        <link rel="preload" href="/assets/hero-compressed.mp4" as="video" type="video/mp4" fetchPriority="high" />
+      </head>
       <body className="min-h-full antialiased">
         {children}
         <QuickActionsFab />
