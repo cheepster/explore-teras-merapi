@@ -33,6 +33,11 @@ const FALLBACK_DATA = [
   { tab: 'umkm', id: 'placeholder', kategori: 'Kuliner', nama: 'To be continued.', gambar: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=800&q=80', galeri: ['https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=800&q=80'], foto_menu: '', harga: 'Rp 25k – 75k', kontak: '', alamat: '', jam_buka: '' },
 ];
 
+function isDeletedRow(row) {
+  const candidates = [row[''], row.deleted, row.status, row.dihapus];
+  return candidates.some(v => (v ?? '').toString().trim().toUpperCase() === 'DELETED');
+}
+
 export async function fetchAllItems() {
   const url = process.env.NEXT_PUBLIC_SHEETS_URL;
   if (!url) return FALLBACK_DATA;
@@ -44,27 +49,30 @@ export async function fetchAllItems() {
     const { default: Papa } = await import('papaparse');
     const { data } = Papa.parse(text, { header: true, skipEmptyLines: true });
 
-    const rows = data.map(row => {
-      const galeri = ['gambar_1', 'gambar_2', 'gambar_3', 'gambar_4', 'gambar_5']
-        .map(col => row[col]?.trim())
-        .filter(Boolean)
-        .map(url => getDriveUrl(url) || url);
+    const rows = data
+      .filter(row => !isDeletedRow(row))
+      .map(row => {
+        const galeri = ['gambar_1', 'gambar_2', 'gambar_3', 'gambar_4', 'gambar_5']
+          .map(col => row[col]?.trim())
+          .filter(Boolean)
+          .map(url => getDriveUrl(url) || url);
 
-      return {
-        tab: row.tab?.trim() || '',
-        id: row.id?.trim() || toSlug(row.nama || ''),
-        kategori: row.kategori?.trim() || '',
-        nama: row.nama?.trim() || '',
-        deskripsi:row.deskripsi?.trim() || '',
-        gambar: galeri[0] || '',  
-        galeri, 
-        foto_menu: getDriveUrl(row.foto_menu?.trim()) || row.foto_menu?.trim() || '', 
-        harga: row.harga?.trim() || '',
-        kontak: row.kontak?.trim() || '',
-        alamat: row.alamat?.trim() || '',
-        jam_buka: row.jam_buka?.trim() || '',
-      };
-    }).filter(item => item.tab && item.nama);
+        return {
+          tab: row.tab?.trim() || '',
+          id: row.id?.trim() || toSlug(row.nama || ''),
+          kategori: row.kategori?.trim() || '',
+          nama: row.nama?.trim() || '',
+          deskripsi:row.deskripsi?.trim() || '',
+          gambar: galeri[0] || '',  
+          galeri, 
+          foto_menu: getDriveUrl(row.foto_menu?.trim()) || row.foto_menu?.trim() || '', 
+          harga: row.harga?.trim() || '',
+          kontak: row.kontak?.trim() || '',
+          alamat: row.alamat?.trim() || '',
+          jam_buka: row.jam_buka?.trim() || '',
+        };
+      })
+      .filter(item => item.tab && item.nama);
 
     return rows.length > 0 ? rows : FALLBACK_DATA;
   } catch (err) {
@@ -91,6 +99,7 @@ export async function fetchProdukByUmkmId(umkmId) {
 
     return data
       .filter(row => String(row.umkm_id?.trim()) === String(umkmId))
+      .filter(row => !isDeletedRow(row))
       .map(row => ({
         nama:      row.nama?.trim() || '',
         deskripsi: row.deskripsi?.trim() || '',
