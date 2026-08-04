@@ -58,7 +58,7 @@ function buildJsonLd(tab, item, path) {
     umkm: 'LocalBusiness',
     homestay: 'LodgingBusiness',
     layanan: 'TouristAttraction',
-    events: 'Event',
+    events: 'Place',
   };
 
   return {
@@ -279,9 +279,9 @@ export default async function DetailPage({ params }) {
         {tab === 'umkm' && !item.foto_menu && produkList.length === 0 && (
           <div className="text-center py-16 border border-dashed border-[#3D2E1E] rounded-2xl mt-4">
             <ShoppingBag size={36} className="text-[#3D2E1E] mx-auto mb-4" />
-            <p className="font-serif italic text-[#A89070]/50 text-lg">Daftar menu belum tersedia.</p>
+            <p className="font-serif italic text-[#A89070]/50 text-lg">Menu segera hadir.</p>
             <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-[#A89070]/30 mt-2">
-              Tambahkan foto_menu di sheet, atau isi menu andalan di sheet Produk
+              Sementara ini, silakan hubungi kami langsung untuk info menu
             </p>
           </div>
         )}
